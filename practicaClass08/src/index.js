@@ -1,9 +1,5 @@
 import express from 'express';
-
-/**
- * DATOS A MANIPULAR
- */
-let frase = 'Hola mundo como estan';
+import Producto from './productos';
 
 /** INICIALIZACION API con EXPRESS */
 const app = express();
@@ -17,78 +13,41 @@ server.on('error', (err) => {
 });
 
 /**
- * DEFINICION RUTAS BASICAS
+ * DATOS A MANIPULAR
  */
-
-app.get('/api/leer', (req, res) => {
+const miProducto = new Producto();
+app.get('/api/productos/listar', (req, res) => {
+  const data = miProducto.leer();
+  if (data.length == 0) {
+    res.json({
+      msg: 'no hay productos cargados',
+    });
+  }
   res.json({
-    frase,
+    data,
   });
 });
 
-app.get('/api/leer/:pos', (req, res) => {
-  const posicion = parseInt(req.params.pos);
-
-  const palabras = frase.split(' ');
-  if (posicion < 1 || posicion > palabras.length) {
-    return res.status(400).json({
-      error: 'El parámetro está fuera de rango',
+app.get('/api/productos/listar/:id', (req, res) => {
+  const id = req.params.id;
+  const data = miProducto.leerPorId(id);
+  if (!data) {
+    res.json({
+      msg: 'Error producto no encontrado',
     });
   }
-
   res.json({
-    palabra: palabras[posicion - 1],
+    data,
   });
 });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/api/guardar', (req, res) => {
+app.post('/api/productos/guardar', (req, res) => {
   const body = req.body;
-
-  frase += ' ' + body.nuevaPalabra;
+  const producto = miProducto.guardar(body);
   res.json({
-    frase,
+    producto,
   });
 });
-
-app.put('/api/actualizar/:pos', (req, res) => {
-  const posicion = parseInt(req.params.pos);
-  const body = req.body;
-
-  const palabras = frase.split(' ');
-  if (posicion < 1 || posicion > palabras.length) {
-    return res.status(400).json({
-      error: 'El parámetro está fuera de rango',
-    });
-  }
-
-  palabras[posicion - 1] = body.nuevaPalabra;
-
-  frase = palabras.join(' ');
-
-  res.json({
-    frase,
-  });
-});
-
-app.delete('/api/borrar/:pos', (req, res) => {
-  const posicion = parseInt(req.params.pos) - 1;
-
-  const palabras = frase.split(' ');
-  if (posicion < 1 || posicion > palabras.length) {
-    return res.status(400).json({
-      error: 'El parámetro está fuera de rango',
-    });
-  }
-
-  palabras.splice(posicion, 1);
-
-  frase = palabras.join(' ');
-  res.json({
-    frase,
-  });
-});
-
-
