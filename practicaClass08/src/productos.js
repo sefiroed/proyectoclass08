@@ -1,4 +1,5 @@
-// import express from 'express';
+/*Creamos nuestra clase con los metodos a utilizar 
+en la carpeta index.js*/
 
 class Producto {
   productos;
